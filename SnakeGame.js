@@ -8,16 +8,14 @@ let SquareEnum = {
     "APPLE": 1,
     "SNAKE": 2
 };
+Object.freeze(SquareEnum);
 let DirectionEnum = {
     "EAST": 0,
     "SOUTH": 1,
     "WEST": 2,
     "NORTH": 3
 };
-let TurnDirectionEnum = {
-    "LEFT": 0,
-    "RIGHT": 1
-};
+Object.freeze(DirectionEnum);
 let DirectionIndexesEnum = {
     0: {x: 0, y: 1},
     1: {x: 1, y: 0},
@@ -25,9 +23,6 @@ let DirectionIndexesEnum = {
     3: {x: -1, y: 0}
 };
 Object.freeze(DirectionIndexesEnum);
-Object.freeze(SquareEnum);
-Object.freeze(DirectionEnum);
-Object.freeze(TurnDirectionEnum);
 
 class Square {
     constructor(x, y, value) {
@@ -47,15 +42,14 @@ class SnakeGame {
         let head = this.getSnakeHead();
         let nextX = head.x + DirectionIndexesEnum[this.snakeDirection].x;
         let nextY = head.y + DirectionIndexesEnum[this.snakeDirection].y;
-        this.snakify(nextX, nextY);
-        let tail = this.getSnakeTail();
-        this.unsnakify(tail.x, tail.y);
+        this.snakify(this.getSquareByIndexes(nextX, nextY));
+        this.unsnakify(this.getSnakeTail());
     }
 
     turnSnakeHead(direction) {
-        if (direction === TurnDirectionEnum["RIGHT"]) {
+        if (direction === "RIGHT") {
             this.snakeDirection = (this.snakeDirection + 1) % 4;
-        } else if (direction === TurnDirectionEnum["LEFT"]){
+        } else if (direction === "LEFT") {
             this.snakeDirection = (this.snakeDirection - 1 + 4) % 4;
         }
     }
@@ -77,41 +71,44 @@ class SnakeGame {
     createSnake() {
         this.snake = [];
         defaultSnakeBodyIndexes.forEach(function (point) {
-            this.snakify(point[0], point[1]);
+            this.snakify(this.getSquareByIndexes(point[0], point[1]));
         }, this);
     }
 
-    snakify(x, y) {
-        console.log(x, y);
-        this.grid[x][y].value = SquareEnum["SNAKE"];
-        this.snake.push(this.grid[x][y]);
+    snakify(square) {
+        square.value = SquareEnum["SNAKE"];
+        this.snake.push(square);
     }
 
-    unsnakify(x, y) {
-        if (this.isSnake(x, y)) {
-            this.emptify(x, y);
+    unsnakify(square) {
+        if (this.isSnake(square)) {
+            this.emptify(square);
             this.snake.shift();
         }
     }
 
-    applify(x, y) {
-        this.grid[x][y].value = SquareEnum["APPLE"]
+    applify(square) {
+        square.value = SquareEnum["APPLE"]
     }
 
-    emptify(x, y) {
-        this.grid[x][y].value = SquareEnum["EMPTY"]
+    emptify(square) {
+        square.value = SquareEnum["EMPTY"]
     }
 
-    isSnake(x, y) {
-        return this.grid[x][y].value === SquareEnum["SNAKE"];
+    isSnake(square) {
+        return square.value === SquareEnum["SNAKE"];
     }
 
     getSnakeHead() {
-        return this.snake[this.snake.length - 1];
+        return this.snake.length > 0 ? this.snake[this.snake.length - 1] : null;
     }
 
     getSnakeTail() {
-        return this.snake[0];
+        return this.snake.length > 0 ? this.snake[0] : null;
+    }
+
+    getSquareByIndexes(x, y) {
+        return this.grid[x][y]
     }
 
     getNumberGrid() {
@@ -122,8 +119,5 @@ class SnakeGame {
 
 let game = new SnakeGame(5, 5);
 console.table(game.getNumberGrid());
-game.step();
-console.table(game.getNumberGrid());
-game.turnSnakeHead(TurnDirectionEnum["LEFT"]);
 game.step();
 console.table(game.getNumberGrid());
