@@ -1,7 +1,7 @@
 let defaultHeight = 10;
 let defaultWidth = 10;
 let defaultSnakeDirection = "EAST";
-let defaultSnakeBodyIndexes = [[0, 0], [0, 1], [0, 2]];
+let defaultSnakeBodyIndexes = [[1, 1], [1, 2], [1, 3]];
 
 let SquareEnum = {
     "EMPTY": 0,
@@ -30,10 +30,6 @@ class Square {
         this.y = y;
         this.value = value;
     }
-
-    toString() {
-        return this.value;
-    };
 }
 
 class SnakeGame {
@@ -65,10 +61,10 @@ class SnakeGame {
             }
         }
         this.snakeDirection = DirectionEnum[defaultSnakeDirection];
-        this.createSnake();
+        this.initNewRound();
     }
 
-    createSnake() {
+    createDefaultSnake() {
         this.snake = [];
         defaultSnakeBodyIndexes.forEach(function (point) {
             this.snakify(this.getSquareByIndexes(point[0], point[1]));
@@ -88,14 +84,15 @@ class SnakeGame {
     }
 
     applify(square) {
-        square.value = SquareEnum["APPLE"]
+        square.value = SquareEnum["APPLE"];
+        this.apple = square;
     }
 
-    emptify(square) {
+    static emptify(square) {
         square.value = SquareEnum["EMPTY"]
     }
 
-    isSnake(square) {
+    static isSnake(square) {
         return square.value === SquareEnum["SNAKE"];
     }
 
@@ -111,13 +108,40 @@ class SnakeGame {
         return this.grid[x][y]
     }
 
+    gameOver() {
+        this.initNewRound();
+    }
+
+    clearBoard() {
+        this.grid.forEach(function (line) {
+            line.forEach(function (square) {
+                square.value = SquareEnum["EMPTY"];
+            })
+        })
+    }
+
     getNumberGrid() {
         return this.grid.map(line => line.map(square => square.value))
+    }
+
+    initNewRound() {
+        this.clearBoard();
+        this.createDefaultSnake();
+        this.createRandomApple();
+    }
+
+    createRandomApple() {
+        let x = Math.floor(Math.random() * this.height);
+        let y = Math.floor(Math.random() * this.width);
+        let square = this.getSquareByIndexes(x, y);
+        if (this.isSnake(square)){
+            this.createRandomApple();
+        } else {
+            this.applify(square);
+        }
     }
 }
 
 
 let game = new SnakeGame(5, 5);
-console.table(game.getNumberGrid());
-game.step();
 console.table(game.getNumberGrid());
