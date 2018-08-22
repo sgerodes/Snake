@@ -21,14 +21,14 @@ const draw = () => {
 
     // draw snake
     ctx.fillStyle = 'rgb(0,200,50)';
-    game.snake.map(p => ctx.fillRect(y(p.y), x(p.x), y(1), x(1)));
+    game.snake.map(p => ctx.fillRect(y(p.y)+1, x(p.x)+1, y(1)-1, x(1)-1));
 
     // draw apples
     ctx.fillStyle = 'rgb(255,50,0)';
     ctx.fillRect(x(game.apple.y)+3, y(game.apple.x)+3, y(1)-3, x(1)-3);
 
     // add crash
-    if (game.snake.length === 0) {
+    if (game.gameOver) {
         ctx.fillStyle = 'rgb(255,0,0)';
         ctx.fillRect(0, 0, canvas.width, canvas.height)
     }
@@ -39,7 +39,7 @@ const draw = () => {
 function stepAndAnimate() {
     game.step();
     draw();
-    console.table(game.getNumberGrid());
+    //console.table(game.getNumberGrid());
 }
 
 function animateCanvas() {

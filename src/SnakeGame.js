@@ -1,6 +1,6 @@
 let defaultHeight = 10;
 let defaultWidth = 10;
-let defaultGameSpeed = 600; // in ms
+let defaultGameSpeed = 300; // in ms
 let defaultSnakeDirection = "EAST";
 let defaultSnakeBodyIndexes = [[1, 1], [1, 2], [1, 3]];
 
@@ -36,6 +36,9 @@ class Square {
 class SnakeGame {
 
     step() {
+        if (this.gameOver){
+            this.initNewRound()
+        }
         if (this.nextTurnDirection) {
             this.turnSnakeHead(this.nextTurnDirection);
             this.nextTurnDirection = null;
@@ -44,8 +47,8 @@ class SnakeGame {
         let nextX = head.x + DirectionIndexesEnum[this.snakeDirection].x;
         let nextY = head.y + DirectionIndexesEnum[this.snakeDirection].y;
         let nextSquare = this.getSquareByIndexes(nextX, nextY);
-        if ( !nextSquare || this.isSnake(nextSquare)) {
-            this.crash();
+        if ( !nextSquare || this.isSnake(nextSquare) && !this.isTail(nextSquare)) {
+            //this.endRound();
         } else if (this.isApple(nextSquare)){
             this.eatApple();
         } else {
@@ -64,6 +67,7 @@ class SnakeGame {
     constructor(height = defaultHeight, width = defaultWidth) {
         this.height = height;
         this.width = width;
+        this.snake = [];
         this.speed = defaultGameSpeed;
         this.grid = new Array(this.height);
         for (let i = 0; i < this.height; i++) {
@@ -78,7 +82,6 @@ class SnakeGame {
     }
 
     createDefaultSnake() {
-        this.snake = [];
         defaultSnakeBodyIndexes.forEach(function (point) {
             this.snakify(this.getSquareByIndexes(point[0], point[1]));
         }, this);
@@ -122,6 +125,13 @@ class SnakeGame {
     isApple(square) {
         return square.value === SquareEnum["APPLE"];
     }
+    isEmpty(square) {
+        return square.value === SquareEnum["EMPTY"];
+    }
+
+    isTail(square){
+        return square === this.getSnakeTail();
+    }
 
     indexIsInside(x, y){
         return x >= 0 && x < this.height && y >= 0 && x < this.width
@@ -142,8 +152,8 @@ class SnakeGame {
         return this.grid[x][y]
     }
 
-    crash() {
-        console.log("crashed")
+    endRound() {
+        this.gameOver = true;
     }
 
     clearBoard() {
@@ -162,13 +172,14 @@ class SnakeGame {
         this.clearBoard();
         this.createDefaultSnake();
         this.createRandomApple();
+        this.gameOver = false;
     }
 
     createRandomApple() {
         let x = Math.floor(Math.random() * this.height);
         let y = Math.floor(Math.random() * this.width);
         let square = this.getSquareByIndexes(x, y);
-        if (this.isSnake(square) || this.isApple(square)) {
+        if (!this.isEmpty(square)) {
             this.createRandomApple();
         } else {
             this.applify(square);
