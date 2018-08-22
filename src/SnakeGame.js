@@ -1,5 +1,6 @@
 let defaultHeight = 10;
 let defaultWidth = 10;
+let defaultGameSpeed = 300; // in ms
 let defaultSnakeDirection = "EAST";
 let defaultSnakeBodyIndexes = [[1, 1], [1, 2], [1, 3]];
 
@@ -35,6 +36,10 @@ class Square {
 class SnakeGame {
 
     step() {
+        if (this.nextTurnDirection){
+            this.turnSnakeHead(this.nextTurnDirection);
+            this.nextTurnDirection = null;
+        }
         let head = this.getSnakeHead();
         let nextX = head.x + DirectionIndexesEnum[this.snakeDirection].x;
         let nextY = head.y + DirectionIndexesEnum[this.snakeDirection].y;
@@ -53,6 +58,7 @@ class SnakeGame {
     constructor(height = defaultHeight, width = defaultWidth) {
         this.height = height;
         this.width = width;
+        this.speed = defaultGameSpeed;
         this.grid = new Array(this.height);
         for (let i = 0; i < this.height; i++) {
             this.grid[i] = new Array(this.width);
@@ -62,6 +68,7 @@ class SnakeGame {
         }
         this.snakeDirection = DirectionEnum[defaultSnakeDirection];
         this.initNewRound();
+        this.nextTurnDirection = null;
     }
 
     createDefaultSnake() {
@@ -88,11 +95,11 @@ class SnakeGame {
         this.apple = square;
     }
 
-    static emptify(square) {
+    emptify(square) {
         square.value = SquareEnum["EMPTY"]
     }
 
-    static isSnake(square) {
+    isSnake(square) {
         return square.value === SquareEnum["SNAKE"];
     }
 
@@ -109,7 +116,6 @@ class SnakeGame {
     }
 
     gameOver() {
-        this.initNewRound();
     }
 
     clearBoard() {
@@ -142,6 +148,3 @@ class SnakeGame {
     }
 }
 
-
-let game = new SnakeGame(5, 5);
-console.table(game.getNumberGrid());
