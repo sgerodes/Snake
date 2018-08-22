@@ -1,6 +1,6 @@
 let defaultHeight = 10;
 let defaultWidth = 10;
-let defaultGameSpeed = 300; // in ms
+let defaultGameSpeed = 600; // in ms
 let defaultSnakeDirection = "EAST";
 let defaultSnakeBodyIndexes = [[1, 1], [1, 2], [1, 3]];
 
@@ -36,15 +36,21 @@ class Square {
 class SnakeGame {
 
     step() {
-        if (this.nextTurnDirection){
+        if (this.nextTurnDirection) {
             this.turnSnakeHead(this.nextTurnDirection);
             this.nextTurnDirection = null;
         }
         let head = this.getSnakeHead();
         let nextX = head.x + DirectionIndexesEnum[this.snakeDirection].x;
         let nextY = head.y + DirectionIndexesEnum[this.snakeDirection].y;
-        this.snakify(this.getSquareByIndexes(nextX, nextY));
-        this.unsnakify(this.getSnakeTail());
+        let nextSquare = this.getSquareByIndexes(nextX, nextY);
+        if ( !nextSquare || this.isSnake(nextSquare)) {
+            this.crash();
+        } else if (this.isApple(nextSquare)){
+            this.eatApple();
+        } else {
+            this.snakeGoOneStep(nextSquare);
+        }
     }
 
     turnSnakeHead(direction) {
@@ -95,12 +101,30 @@ class SnakeGame {
         this.apple = square;
     }
 
+    eatApple() {
+        this.snakify(this.apple);
+        this.createRandomApple();
+    }
+
+    snakeGoOneStep(square){
+        this.snakify(square);
+        this.unsnakify(this.getSnakeTail());
+    }
+
     emptify(square) {
         square.value = SquareEnum["EMPTY"]
     }
 
     isSnake(square) {
         return square.value === SquareEnum["SNAKE"];
+    }
+
+    isApple(square) {
+        return square.value === SquareEnum["APPLE"];
+    }
+
+    indexIsInside(x, y){
+        return x >= 0 && x < this.height && y >= 0 && x < this.width
     }
 
     getSnakeHead() {
@@ -112,10 +136,14 @@ class SnakeGame {
     }
 
     getSquareByIndexes(x, y) {
+        if(!this.indexIsInside(x,y)){
+            return null;
+        }
         return this.grid[x][y]
     }
 
-    gameOver() {
+    crash() {
+        console.log("crashed")
     }
 
     clearBoard() {
@@ -140,7 +168,7 @@ class SnakeGame {
         let x = Math.floor(Math.random() * this.height);
         let y = Math.floor(Math.random() * this.width);
         let square = this.getSquareByIndexes(x, y);
-        if (this.isSnake(square)){
+        if (this.isSnake(square) || this.isApple(square)) {
             this.createRandomApple();
         } else {
             this.applify(square);

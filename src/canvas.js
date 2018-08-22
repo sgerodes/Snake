@@ -25,7 +25,7 @@ const draw = () => {
 
     // draw apples
     ctx.fillStyle = 'rgb(255,50,0)';
-    ctx.fillRect(x(game.apple.y), y(game.apple.x), y(1), x(1));
+    ctx.fillRect(x(game.apple.y)+3, y(game.apple.x)+3, y(1)-3, x(1)-3);
 
     // add crash
     if (game.snake.length === 0) {
@@ -39,6 +39,7 @@ const draw = () => {
 function stepAndAnimate() {
     game.step();
     draw();
+    console.table(game.getNumberGrid());
 }
 
 function animateCanvas() {
@@ -59,16 +60,10 @@ function calculateTurnDirection(currentDirection, arrowDirection) {
         return null;
     }
     //special cases
-    if (curr === DirectionEnum["EAST"] && arrow === ArrowEnum["DOWN"] ||
-        curr === DirectionEnum["SOUTH"] && arrow === ArrowEnum["LEFT"] ||
-        curr === DirectionEnum["WEST"] && arrow === ArrowEnum["UP"] ||
-        curr === DirectionEnum["NORTH"] && arrow === ArrowEnum["RIGHT"]){
+    if (curr === DirectionEnum["NORTH"] && arrow === ArrowEnum["RIGHT"] ){
         return "RIGHT"
     }
-    if (curr === DirectionEnum["EAST"] && arrow === ArrowEnum["UP"] ||
-        curr === DirectionEnum["SOUTH"] && arrow === ArrowEnum["RIGHT"] ||
-        curr === DirectionEnum["WEST"] && arrow === ArrowEnum["DOWN"] ||
-        curr === DirectionEnum["NORTH"] && arrow === ArrowEnum["LEFT"]){
+    if (curr === DirectionEnum["EAST"] && arrow === ArrowEnum["UP"]){
         return "LEFT"
     }
     if (curr > arrow){
